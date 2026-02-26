@@ -1,0 +1,57 @@
+apiVersion: batch.volcano.sh/v1alpha1
+kind: Job
+metadata:
+  name: tensorflow-dist-mnist
+spec:
+  minAvailable: 3 # 该 job 的 3 个 pod 必须都可用
+  schedulerName: volcano # 指定 volcano 为调度器
+  plugins:
+    env: []
+    svc: []
+  policies:
+    - event: PodEvicted # 当 pod 被驱逐时, 重启该 job
+      action: RestartJob
+  tasks:
+    - replicas: 1 # 指定 1 个 ps pod
+      name: ps
+      template: # ps pod 的具体定义
+        spec:
+          containers:
+            - command:
+                - sh
+                - -c
+                - |
+                  PS_HOST=`cat /etc/volcano/ps.host | sed 's/$/&:2222/g' | sed 's/^/"/;s/$/"/' | tr "\n" ","`;
+                  WORKER_HOST=`cat /etc/volcano/worker.host | sed 's/$/&:2222/g' | sed 's/^/"/;s/$/"/' | tr "\n" ","`;
+                  export TF_CONFIG={\"cluster\":{\"ps\":[${PS_HOST}],\"worker\":[${WORKER_HOST}]},\"task\":{\"type\":\"ps\",\"index\":${VK_TASK_INDEX}},\"environment\":\"cloud\"};
+                  python /var/tf_dist_mnist/dist_mnist.py
+              image: volcanosh/dist-mnist-tf-example:0.0.1
+              name: tensorflow
+              ports:
+                - containerPort: 2222
+                  name: tfjob-port
+              resources: {}
+          restartPolicy: Never
+    - replicas: 2 # 指定 2 个 worker pod
+      name: worker
+      policies:
+        - event: TaskCompleted # 2 个 worker 完成任务时认为该 job 完成任务
+          action: CompleteJob
+      template: # worker pod 的具体定义
+        spec:
+          containers:
+            - command:
+                - sh
+                - -c
+                - |
+                  PS_HOST=`cat /etc/volcano/ps.host | sed 's/$/&:2222/g' | sed 's/^/"/;s/$/"/' | tr "\n" ","`;
+                  WORKER_HOST=`cat /etc/volcano/worker.host | sed 's/$/&:2222/g' | sed 's/^/"/;s/$/"/' | tr "\n" ","`;
+                  export TF_CONFIG={\"cluster\":{\"ps\":[${PS_HOST}],\"worker\":[${WORKER_HOST}]},\"task\":{\"type\":\"worker\",\"index\":${VK_TASK_INDEX}},\"environment\":\"cloud\"};
+                  python /var/tf_dist_mnist/dist_mnist.py
+              image: volcanosh/dist-mnist-tf-example:0.0.1
+              name: tensorflow
+              ports:
+                - containerPort: 2222
+                  name: tfjob-port
+              resources: {}
+          restartPolicy: Never
