@@ -1,6 +1,6 @@
 通过 Deployment Yaml 安装
 
-这种安装方式支持x86_64/arm64两种架构. 在你的kubernetes集群上, 执行如下的kubectl指令.
+这种安装方式支持 x86_64/arm64 两种架构. 在你的 kubernetes 集群上, 执行如下的 kubectl 指令.
 
 ```bash
 
@@ -53,11 +53,9 @@ Job
 CustomResourceDefinition
     jobs.batch.volcano.sh
     podgroups.scheduling.volcano.sh
-    
+    queues.scheduling.volcano.sh
     cronjobs.batch.volcano.sh
     commands.bus.volcano.sh
-    
-    queues.scheduling.volcano.sh
     numatopologies.nodeinfo.volcano.sh
     hypernodes.topology.volcano.sh
     nodeshards.shard.volcano.sh
