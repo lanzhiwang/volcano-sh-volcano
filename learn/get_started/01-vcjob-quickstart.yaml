@@ -1,0 +1,36 @@
+# vcjob-quickstart.yaml
+apiVersion: batch.volcano.sh/v1alpha1
+kind: Job
+metadata:
+  name: quickstart-job
+spec:
+  minAvailable: 3
+  schedulerName: volcano
+  # 如果省略 'queue' 字段, 将使用 'default' 队列.
+  # queue: default
+  policies:
+    # 如果 Pod 失败(例如, 由于应用程序错误), 则重启整个作业.
+    - event: PodFailed
+      action: RestartJob
+  tasks:
+    - replicas: 3
+      name: completion-task
+      policies:
+        # 当此特定任务成功完成时, 将整个作业标记为"完成".
+        - event: TaskCompleted
+          action: CompleteJob
+      template:
+        spec:
+          containers:
+            - command:
+                - sh
+                - -c
+                - 'echo "Job is running and will complete!"; sleep 100; echo "Job done!"'
+              image: busybox:latest
+              name: busybox-container
+              resources:
+                requests:
+                  cpu: 1
+                limits:
+                  cpu: 1
+          restartPolicy: Never

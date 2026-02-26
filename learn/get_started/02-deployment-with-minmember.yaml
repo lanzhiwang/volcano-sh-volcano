@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment
+  annotations:
+    # 对成组调度至关重要: 此注解告知 Volcano 将此 Deployment 视为一个组,
+    # 要求至少 2 个 Pod 能够一起调度, 然后才会启动任何 Pod.
+    scheduling.volcano.sh/group-min-member: "2"
+  labels:
+    app: my-app
+spec:
+  replicas: 3 # 我们期望应用有 3 个副本
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      # annotations:
+      #   可选: 您也可以为此 Deployment 创建的 PodGroup 指定一个特定的 Volcano 队列.
+      #   scheduling.volcano.sh/queue-name: "my-deployment-queue"
+      labels:
+        app: my-app
+    spec:
+      schedulerName: volcano # 关键: 确保此 Deployment 的 Pod 使用 Volcano 调度器
+      containers:
+        - name: my-container
+          image: busybox
+          command: [
+              "sh",
+              "-c",
+              "echo 'Hello Volcano from Deployment'; sleep 3600",
+            ] # 一个长时间运行的命令, 用于演示
+          resources:
+            requests:
+              cpu: 1
+            limits:
+              cpu: 1

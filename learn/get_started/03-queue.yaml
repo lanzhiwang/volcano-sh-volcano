@@ -1,0 +1,9 @@
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: Queue
+metadata:
+  name: development-queue
+spec:
+  weight: 1 # 队列间的调度优先级相对权重
+  reclaimable: false # 如果为 true, 其他队列中的作业可以回收此队列中的资源
+  capability:
+    cpu: 2

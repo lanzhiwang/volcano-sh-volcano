@@ -1,0 +1,20 @@
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: Queue
+metadata:
+  name: test
+spec:
+  capability:
+    cpu: "8"
+    memory: 16Gi
+  # deserved 字段仅用于 capacity 插件
+  deserved:
+    cpu: "4"
+    memory: 8Gi
+  guarantee:
+    resource:
+      cpu: "2"
+      memory: 4Gi
+  priority: 100
+  reclaimable: true
+  # weight 字段仅用于 proportion 插件
+  weight: 1
