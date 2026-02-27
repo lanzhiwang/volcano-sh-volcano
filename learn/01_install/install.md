@@ -55,9 +55,9 @@ CustomResourceDefinition
     podgroups.scheduling.volcano.sh
     queues.scheduling.volcano.sh
     cronjobs.batch.volcano.sh
+    hypernodes.topology.volcano.sh
     commands.bus.volcano.sh
     numatopologies.nodeinfo.volcano.sh
-    hypernodes.topology.volcano.sh
     nodeshards.shard.volcano.sh
     colocationconfigurations.config.volcano.sh
     jobtemplates.flow.volcano.sh
